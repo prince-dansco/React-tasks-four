@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { FaCheck } from "react-icons/fa";
 
 function App() {
   const myRef = useRef();
@@ -6,6 +7,7 @@ function App() {
   const [todo, setTodo] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [editItem, setEditItem] = useState(null);
+  const [complete, setComplete] = useState({});
 
   useEffect(() => {
     const savedTodo = localStorage.getItem("todo");
@@ -13,10 +15,20 @@ function App() {
       setTodo(JSON.parse(savedTodo));
     }
   }, []);
+  useEffect(() => {
+    const saveComplete = localStorage.getItem("complete");
+    if (saveComplete) {
+      setComplete(JSON.parse(saveComplete));
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("todo", JSON.stringify(todo));
   }, [todo]);
+  
+  useEffect(() => {
+    localStorage.setItem("complete", JSON.stringify(complete));
+  }, [complete]);
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newTask !== "") {
@@ -51,10 +63,18 @@ function App() {
     myRef.current.focus();
   };
 
+  const handleCheck = (index) => {
+    setComplete((prevComplete) => ({
+      ...prevComplete,
+      [index]: !prevComplete[index],
+    }));
+  };
   return (
     <div className="App">
       <h1>my todo list</h1>
-      <p><i>lord dansco</i></p>
+      <p>
+        <i>lord dansco</i>
+      </p>
       <div className="container">
         <form onSubmit={handleSubmit}>
           <input
@@ -71,12 +91,23 @@ function App() {
         </form>
         <div className="">
           {todo.map((todoItem, index) => (
-            <div className="todoItem" key={index}>
-              <p>{todoItem}</p>
+            <div
+              className={"todoItem" + (complete[index] ? " completed" : "")}
+              key={index}
+            >
+              <p
+                style={{
+                  textDecoration: complete[index] ? "line-through" : "",
+                  color: complete[index] ? "red" : "",
+                }}
+              >
+                {todoItem}
+              </p>
               <div className="flex">
                 <button className="delete" onClick={() => handleDelete(index)}>
                   Delete
                 </button>
+                <FaCheck onClick={() => handleCheck(index)} />
                 <button className="edit" onClick={() => handleEdit(index)}>
                   Edit
                 </button>
